@@ -1,0 +1,52 @@
+module DigitalAssetContract where
+
+import DA.Next.Map
+import DA.Text
+
+template DepositToken
+  with
+    issuer : Party               -- Bank A
+    owner  : Party               -- End user
+    amount : Decimal
+    assetId: Text
+  where
+    signatory issuer, owner
+
+    -- Choice to transfer ownership of the token
+    choice Transfer : ContractId DepositToken
+      with
+        newOwner : Party
+      controller owner
+      do
+        create this with owner = newOwner
+
+-- Template for Bank A to issue tokens to users
+template TokenIssuance
+  with
+    bank      : Party            -- Bank A
+    recipients: [Party]          -- List of users
+    amounts   : [Decimal]        -- Amounts per user (same length as recipients)
+    assetId   : Text             -- Asset identifier
+  where
+    signatory bank
+
+    precondition
+      length recipients == length amounts
+
+    choice IssueTokens : [ContractId DepositToken]
+      controller bank
+      do
+        let tokens =
+              zipWith (\user amt -> DepositToken with
+                                        issuer = bank
+                                        owner  = user
+                                        amount = amt
+                                        assetId= assetId)
+                recipients amounts
+        mapA create tokens
+
+-- Example instantiation for Bank A assigning deposit tokens to 5 users:
+-- Bank A calls the IssueTokens choice on a TokenIssuance contract
+-- with recipients = [user1, user2, user3, user4, user5]
+-- and amounts    = [100.0, 100.0, 100.0, 100.0, 100.0]
+-- and assetId    = "USD-Deposit-2025"
