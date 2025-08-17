@@ -8,7 +8,7 @@ template DepositToken
     issuer : Party               -- Bank A
     owner  : Party               -- End user
     amount : Decimal
-    assetId: Text
+    assetId: TestDigitalToken_Retail
   where
     signatory issuer, owner
 
@@ -23,10 +23,10 @@ template DepositToken
 -- Template for Bank A to issue tokens to users
 template TokenIssuance
   with
-    bank      : Party            -- Bank A
-    recipients: [Party]          -- List of users
-    amounts   : [Decimal]        -- Amounts per user (same length as recipients)
-    assetId   : Text             -- Asset identifier
+    bank      : Party                                   -- Bank A
+    recipients: [Party]                                 -- List of users
+    amounts   : [Decimal]                               -- Amounts per user (same length as recipients)
+    assetId   : TestDigitalToken_Retail                 -- Asset identifier
   where
     signatory bank
 
